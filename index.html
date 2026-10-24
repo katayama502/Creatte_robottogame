@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none';">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="クリエット君たちと プログラムカードで ボスに立ち向かう、2〜6人用の 公開情報 戦略カードゲーム">
+<title>クリエット・コードバトル</title>
+<link rel="icon" href="assets/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><img src="assets/logo.webp" alt=""><div><b>クリエット・コードバトル</b><small>プログラムで ボスに立ちむかえ！</small></div></div>
+  <div class="topinfo" id="topinfo" aria-live="polite"></div>
+  <div class="topbtns">
+    <button class="btn ghost" id="btnSound" type="button" aria-label="音の設定"></button>
+    <button class="btn ghost" id="btnHow" type="button">あそびかた</button>
+    <button class="btn ghost" id="btnMenu" type="button" hidden>はじめから</button>
+  </div>
+</header>
+
+<main>
+  <!-- 設定 -->
+  <section id="setup" class="screen">
+    <div class="hero-card">
+      <div class="hero-text">
+        <h1>コードの力で、ボスに いちばんダメージを あたえよう！</h1>
+        <p>カードを ならべて <b>プログラム</b>を作り、自分のキャラを動かして こうげき。手札も ボスの動きも <b>ぜんぶ見えている</b>から、先を読んで作戦を立てよう。</p>
+        <ul class="concepts">
+          <li class="c-順次">じゅんばん（順次）</li><li class="c-くり返し">くり返し</li><li class="c-条件分岐">もし〜なら（条件分岐）</li><li class="c-関数">関数</li><li class="c-デバッグ">デバッグ</li>
+        </ul>
+      </div>
+      <img class="hero-boss" src="assets/maou.webp" alt="">
+    </div>
+
+    <div class="panel">
+      <h2>1. 何人で あそぶ？</h2>
+      <div class="seg" id="segCount" role="radiogroup" aria-label="人数"></div>
+      <h2>2. なまえと キャラクター</h2>
+      <div id="playerRows" class="prows"></div>
+      <h2>3. ボスを えらぶ</h2>
+      <div id="bossPick" class="bosspick" role="radiogroup" aria-label="ボス"></div>
+      <h2>4. ラウンド数</h2>
+      <div class="seg" id="segRounds" role="radiogroup" aria-label="ラウンド数"></div>
+      <p class="note" id="roundNote"></p>
+      <p class="err" id="setupErr" role="alert"></p>
+      <div class="actions">
+        <button class="btn primary big" id="btnStart" type="button">ゲームスタート！</button>
+        <button class="btn big" id="btnResume" type="button" hidden>つづきから</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ゲーム -->
+  <section id="game" class="screen" hidden>
+    <div class="layout">
+      <div class="boardcol">
+        <div class="boardwrap"><div id="board" class="board" role="grid" aria-label="ゲーム盤"></div></div>
+        <div class="legend"><span><i class="lg danger"></i>ボスのつぎの攻撃範囲</span><span><i class="lg ghost"></i>プログラムを動かした後の位置（よそう）</span><label class="chk"><input type="checkbox" id="chkDanger" checked> 攻撃範囲を表示</label></div>
+        <div class="panel boss" id="bossPanel"></div>
+      </div>
+      <div class="ctrlcol">
+        <div class="panel turn" id="turnPanel"></div>
+        <ol class="stepbar" id="stepbar" aria-label="ターンの すすめかた"></ol>
+        <div class="panel" id="progPanel"></div>
+        <div class="panel" id="handPanel"></div>
+      </div>
+    </div>
+    <div class="panel"><h2>みんなの ようす（手札も ぜんぶ公開）</h2><div id="playersPanel" class="players"></div></div>
+    <details class="panel logp"><summary>できごとの記録</summary><ol id="log" class="log" aria-live="polite"></ol></details>
+  </section>
+
+  <!-- 結果 -->
+  <section id="result" class="screen" hidden>
+    <div class="panel result" id="resultPanel"></div>
+  </section>
+</main>
+
+<div id="overlay" class="overlay" hidden><div class="ovbox" role="dialog" aria-modal="true" aria-labelledby="ovTitle"><div id="ovBody"></div></div></div>
+
+<dialog id="howto" aria-labelledby="howTitle">
+  <div class="howbox">
+    <button class="btn ghost close" id="howClose" type="button" aria-label="とじる">✕</button>
+    <h2 id="howTitle">あそびかた</h2>
+    <ol class="steps">
+      <li><b>① カードを えらぶ</b>：手札の カードを タップすると、上の「プログラム」に 入ります（3まいまで）。上から じゅんばんに 動きます。盤面に「動いた後の位置（よそう）」が出るので、ためしてから きめよう。</li>
+      <li><b>② 実行▶</b>：キャラが プログラムどおりに 動きます。ボスが 目の前にいれば こうげき！ あたえたダメージが 自分の点数です。使ったカードの分だけ、山札から <b>ランダムに</b> 新しいカードが 手札に入ります。</li>
+      <li><b>③ ボスのばん（自動）</b>：ボスが「つぎのボスカード」どおりに 動いて こうげきします。赤いマスに いると、バグ（じゃまなカード）が 手札に入り、1マス ふきとびます。</li>
+      <li><b>じゅんばん</b>：1ラウンド目は 1番の人から、2ラウンド目は ぎゃくの じゅんばん（いちばん最後の人から）。行ったり来たりします。</li>
+      <li><b>勝ち</b>：ボスをたおす（とどめは +2）か、ラウンドがおわったら、<b>いちばん ダメージを あたえた人</b>の勝ち！ 同点なら ダウンした回数が少ない人 → のこりHPが多い人。</li>
+      <li><b>HP</b>：みんな HP5。ボスの攻撃で へります。0になると <b>ダウン</b>（点数が 2 へって、スタート地点で HP が全回復）。デバッグカードや うさぎ治癒師で 回復できます。</li>
+    </ol>
+    <h3>カードと プログラミングの考え方</h3>
+    <div id="howCards" class="howcards"></div>
+    <h3>作戦のヒント</h3>
+    <ul class="tips">
+      <li>ボスの <b>せなか</b>（向きの反対）から こうげきすると +1。</li>
+      <li>まおうドラゴンは いちばんダメージを与えた人を ねらう。トップの人は にげる準備も！</li>
+      <li>時計ドラゴンは いつも同じ じゅんばんで動く。パターン（くり返し）を見つけよう。</li>
+      <li>バグは プログラムに入れると そこで止まる。いちばん最後に入れるか、デバッグで けそう。</li>
+      <li>手札も ボスの予告も みんなに見えています。ほかの人の動きを よそうして、場所の取り合いを しよう。</li>
+    </ul>
+  </div>
+</dialog>
+
+<noscript><p class="err">このゲームは JavaScript を使います。ブラウザの設定で JavaScript を オンにしてください。</p></noscript>
+<script type="module" src="js/ui.js"></script>
+</body>
+</html>

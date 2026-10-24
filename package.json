@@ -1,0 +1,9 @@
+{
+  "name": "creatte-boss-battle",
+  "version": "1.0.0",
+  "description": "クリエット・コードバトル：プログラミングの考え方で戦う 2〜6人用の公開情報カードゲーム",
+  "type": "module",
+  "private": true,
+  "scripts": { "test": "node --test test/*.test.js", "start": "npx --yes http-server -p 8080 -c-1 ." },
+  "license": "MIT"
+}
